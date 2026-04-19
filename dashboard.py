@@ -1,4 +1,6 @@
 
+ 
+
 import streamlit as st
 import pandas as pd
 import joblib
@@ -6,11 +8,23 @@ import joblib
 # ================= LOAD MODEL =================
 model = joblib.load("churn_model.pkl")
 
-# ================= UI STYLE =================
-st.set_page_config(page_title="Churn Dashboard", layout="centered")
+# ================= PAGE CONFIG =================
+st.set_page_config(page_title="Churn Intelligence Dashboard", layout="centered")
 
+# ================= UI HEADER =================
 st.title("📊 Customer Churn Intelligence Dashboard")
-st.markdown("Predict customer churn + business insights in real time 🚀")
+st.markdown("AI-powered prediction + business insights 🚀")
+
+st.markdown("""
+<style>
+.big-font {
+    font-size:20px !important;
+    font-weight:600;
+}
+</style>
+""", unsafe_allow_html=True)
+
+st.markdown('<p class="big-font">📌 Telecom Churn Prediction System</p>', unsafe_allow_html=True)
 
 # ================= INPUT SECTION =================
 st.sidebar.header("Customer Inputs")
@@ -27,86 +41,66 @@ MonthlyCharge = st.sidebar.number_input("Monthly Charge", 0.0, 200.0, 70.0)
 OverageFee = st.sidebar.number_input("Overage Fee", 0.0, 50.0, 5.0)
 RoamMins = st.sidebar.number_input("Roaming Minutes", 0.0, 20.0, 5.0)
 
+# ================= DATA FRAME =================
+input_df = pd.DataFrame([[
+    AccountWeeks,
+    ContractRenewal,
+    DataPlan,
+    DataUsage,
+    CustServCalls,
+    DayMins,
+    DayCalls,
+    MonthlyCharge,
+    OverageFee,
+    RoamMins
+]], columns=[
+    "AccountWeeks","ContractRenewal","DataPlan","DataUsage",
+    "CustServCalls","DayMins","DayCalls","MonthlyCharge",
+    "OverageFee","RoamMins"
+])
+
 # ================= PREDICTION =================
 if st.button("🚀 Predict Churn Risk"):
-
-    input_df = pd.DataFrame([[
-        AccountWeeks,
-        ContractRenewal,
-        DataPlan,
-        DataUsage,
-        CustServCalls,
-        DayMins,
-        DayCalls,
-        MonthlyCharge,
-        OverageFee,
-        RoamMins
-    ]], columns=[
-        "AccountWeeks","ContractRenewal","DataPlan","DataUsage",
-        "CustServCalls","DayMins","DayCalls","MonthlyCharge",
-        "OverageFee","RoamMins"
-    ])
 
     pred = model.predict(input_df)[0]
     proba = model.predict_proba(input_df)[0][1]
 
-    st.subheader("📌 Result")
+    st.subheader("📌 Prediction Result")
 
     if pred == 1:
         st.error("❌ HIGH CHURN RISK")
     else:
         st.success("✅ LOW CHURN RISK")
 
+    # ================= METRICS =================
     st.metric("Churn Probability", f"{round(proba*100,2)}%")
+    st.metric(
+        "Risk Level",
+        "🔴 High" if proba > 0.7 else "🟡 Medium" if proba > 0.3 else "🟢 Low"
+    )
 
     # ================= BUSINESS INSIGHTS =================
-    st.subheader("📊 Insights")
+    st.subheader("📊 Key Business Signals")
 
-    insights = []
+    signals = []
 
     if CustServCalls > 3:
-        insights.append("High customer service complaints 📞")
+        signals.append("📞 Customer is facing repeated issues")
 
     if MonthlyCharge > 80:
-        insights.append("High monthly billing 💰")
+        signals.append("💰 High-value but risky customer")
 
     if DayMins > 250:
-        insights.append("Heavy usage customer ⏱")
+        signals.append("📱 Heavy usage behavior detected")
 
-    if len(insights) == 0:
-        insights.append("Stable customer behavior 👍")
+    if AccountWeeks < 50:
+        signals.append("🆕 New customer (early churn risk)")
 
-    for i in insights:
-        
-        st.write("•", i)
-        
-        st.subheader("🧠 Why this prediction? (Model Explanation)")
+    if len(signals) == 0:
+        signals.append("✅ Stable customer behavior observed")
 
-import numpy as np
-
-# get coefficients
-try:
-    model_coef = model.named_steps["model"].coef_[0]
-    feature_names = input_df.columns
-
-    importance = pd.DataFrame({
-        "Feature": feature_names,
-        "Impact": model_coef
-    })
-
-    importance = importance.sort_values(by="Impact")
-
-    import matplotlib.pyplot as plt
-
-    fig, ax = plt.subplots()
-    ax.barh(importance["Feature"], importance["Impact"])
-
-    ax.set_title("Feature Impact (Logistic Regression)")
-    st.pyplot(fig)
-
-except Exception as e:
-    st.write("Explanation not available, but prediction is working.")
-    
+    for s in signals:
+        st.write("•", s)   
 
 
 
