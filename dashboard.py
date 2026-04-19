@@ -79,13 +79,14 @@ if st.button("🚀 Predict Churn Risk"):
     for i in insights:
         
         st.write("•", i)
-        st.subheader("🧠 AI Explanation (SHAP Feature Impact)")
+        
+    st.subheader("🧠 AI Explanation (SHAP Bar Chart)")
+
+import numpy as np
+import shap
+import matplotlib.pyplot as plt
 
 try:
-    import numpy as np
-    import matplotlib.pyplot as plt
-    import shap
-    try:
     X = input_df.values
 
     # correct explainer for logistic regression
