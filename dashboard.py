@@ -58,23 +58,7 @@ input_df = pd.DataFrame([[
     "CustServCalls","DayMins","DayCalls","MonthlyCharge",
     "OverageFee","RoamMins"
 ])
-st.subheader("📊 KPI Dashboard (Business Overview)")
 
-total_customers = len(input_df)  # for single input demo (later dataset pe scale hoga)
-
-churn_probability = proba
-
-if pred == 1:
-    churn_status = "High Risk"
-else:
-    churn_status = "Low Risk"
-
-st.metric("Churn Probability", f"{round(churn_probability*100,2)}%")
-st.metric("Risk Status", churn_status)
-st.metric("Model Type", "Logistic Regression")
-
-pred = 0
-proba = 0.0
 # ================= PREDICTION =================
 if st.button("🚀 Predict Churn Risk"):
 
