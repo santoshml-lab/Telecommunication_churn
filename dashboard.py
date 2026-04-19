@@ -88,27 +88,31 @@ try:
     try:
     X = input_df.values
 
-    # use model directly (skip pipeline confusion)
-    explainer = shap.Explainer(model)
-    shap_values = explainer(X)
+    # correct explainer for logistic regression
+    explainer = shap.LinearExplainer(model, X, feature_perturbation="interventional")
+    shap_values = explainer.shap_values(X)
 
-    values = shap_values.values[0]
+    values = shap_values[0]
     features = input_df.columns
 
-    # sort importance
     idx = np.argsort(values)
 
     fig, ax = plt.subplots()
 
     ax.barh(features[idx], values[idx])
-    ax.set_xlabel("Impact on Prediction")
-    ax.set_title("Feature Contribution (Churn Prediction)")
+    ax.set_title("Feature Impact on Churn Prediction")
 
     st.pyplot(fig)
 
 except Exception as e:
-    st.error("SHAP failed. Showing fallback explanation.")
-    st.write("Model is working, but explanation layer needs tuning.")
+    st.error("SHAP not working with current model setup.")
+    st.write("Fallback: Model uses weighted features for prediction.")
+
+
+
+
+
+    
 
     
 
