@@ -77,4 +77,40 @@ if st.button("🚀 Predict Churn Risk"):
         insights.append("Stable customer behavior 👍")
 
     for i in insights:
+        
         st.write("•", i)
+        st.subheader("🧠 AI Explanation (SHAP Feature Impact)")
+
+try:
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    # handle pipeline case
+    if "scaler" in model.named_steps:
+        X_transformed = model.named_steps["scaler"].transform(input_df)
+        explainer = shap.Explainer(model.named_steps["model"])
+        shap_values = explainer(X_transformed)
+
+        values = shap_values.values[0]
+
+    else:
+        explainer = shap.Explainer(model)
+        shap_values = explainer(input_df)
+        values = shap_values.values[0]
+
+    feature_names = input_df.columns
+
+    # sort importance
+    sorted_idx = np.argsort(values)
+
+    fig, ax = plt.subplots()
+
+    ax.barh(feature_names[sorted_idx], values[sorted_idx])
+
+    ax.set_title("Feature Impact on Prediction")
+    ax.set_xlabel("Impact Value")
+
+    st.pyplot(fig)
+
+except Exception as e:
+    st.warning("SHAP explanation not available. Showing fallback insights.")
