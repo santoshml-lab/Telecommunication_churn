@@ -84,6 +84,7 @@ if st.button("🚀 Predict Churn Risk"):
 try:
     import numpy as np
     import matplotlib.pyplot as plt
+    import shap
 
     # handle pipeline case
     if "scaler" in model.named_steps:
