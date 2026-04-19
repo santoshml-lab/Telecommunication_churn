@@ -80,34 +80,33 @@ if st.button("🚀 Predict Churn Risk"):
         
         st.write("•", i)
         
-    st.subheader("🧠 AI Explanation (SHAP Bar Chart)")
+        st.subheader("🧠 Why this prediction? (Model Explanation)")
 
 import numpy as np
-import shap
-import matplotlib.pyplot as plt
 
+# get coefficients
 try:
-    X = input_df.values
+    model_coef = model.named_steps["model"].coef_[0]
+    feature_names = input_df.columns
 
-    # correct explainer for logistic regression
-    explainer = shap.LinearExplainer(model, X, feature_perturbation="interventional")
-    shap_values = explainer.shap_values(X)
+    importance = pd.DataFrame({
+        "Feature": feature_names,
+        "Impact": model_coef
+    })
 
-    values = shap_values[0]
-    features = input_df.columns
+    importance = importance.sort_values(by="Impact")
 
-    idx = np.argsort(values)
+    import matplotlib.pyplot as plt
 
     fig, ax = plt.subplots()
+    ax.barh(importance["Feature"], importance["Impact"])
 
-    ax.barh(features[idx], values[idx])
-    ax.set_title("Feature Impact on Churn Prediction")
-
+    ax.set_title("Feature Impact (Logistic Regression)")
     st.pyplot(fig)
 
 except Exception as e:
-    st.error("SHAP not working with current model setup.")
-    st.write("Fallback: Model uses weighted features for prediction.")
+    st.write("Explanation not available, but prediction is working.")
+    
 
 
 
