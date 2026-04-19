@@ -73,6 +73,8 @@ st.metric("Churn Probability", f"{round(churn_probability*100,2)}%")
 st.metric("Risk Status", churn_status)
 st.metric("Model Type", "Logistic Regression")
 
+pred = 0
+proba = 0.0
 # ================= PREDICTION =================
 if st.button("🚀 Predict Churn Risk"):
 
