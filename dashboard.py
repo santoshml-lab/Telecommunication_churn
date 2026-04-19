@@ -85,33 +85,30 @@ try:
     import numpy as np
     import matplotlib.pyplot as plt
     import shap
+    try:
+    X = input_df.values
 
-    # handle pipeline case
-    if "scaler" in model.named_steps:
-        X_transformed = model.named_steps["scaler"].transform(input_df)
-        explainer = shap.Explainer(model.named_steps["model"])
-        shap_values = explainer(X_transformed)
+    # use model directly (skip pipeline confusion)
+    explainer = shap.Explainer(model)
+    shap_values = explainer(X)
 
-        values = shap_values.values[0]
-
-    else:
-        explainer = shap.Explainer(model)
-        shap_values = explainer(input_df)
-        values = shap_values.values[0]
-
-    feature_names = input_df.columns
+    values = shap_values.values[0]
+    features = input_df.columns
 
     # sort importance
-    sorted_idx = np.argsort(values)
+    idx = np.argsort(values)
 
     fig, ax = plt.subplots()
 
-    ax.barh(feature_names[sorted_idx], values[sorted_idx])
-
-    ax.set_title("Feature Impact on Prediction")
-    ax.set_xlabel("Impact Value")
+    ax.barh(features[idx], values[idx])
+    ax.set_xlabel("Impact on Prediction")
+    ax.set_title("Feature Contribution (Churn Prediction)")
 
     st.pyplot(fig)
 
 except Exception as e:
-    st.warning("SHAP explanation not available. Showing fallback insights.")
+    st.error("SHAP failed. Showing fallback explanation.")
+    st.write("Model is working, but explanation layer needs tuning.")
+
+    
+
